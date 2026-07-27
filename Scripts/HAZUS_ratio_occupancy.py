@@ -5,6 +5,7 @@
 
 import pandas as pd
 import glob
+import os
 
 data_FA_Arehart = pd.read_excel('./InputData/Floor_Area_Arehart2020.xlsx', sheet_name='by_state')
 data_FA_Arehart = data_FA_Arehart.set_index('state', drop=False)
@@ -20,7 +21,7 @@ total_area = 0
 files = glob.glob(directoryPath+'*occupancy.txt')
 # files = glob.glob(directoryPath+'*type.txt')
 for file_name in files:
-    state_str = str.split(str.split(str.split(file_name, '/')[3], '.')[0], '_')[0]
+    state_str = os.path.splitext(os.path.basename(file_name))[0].split('_')[0]
     x = pd.read_csv(file_name, low_memory=False)
     x = x.set_index('Tract', drop=True)
     x_sum = x.sum(axis=0) * 1000 * 0.092903 / 10e6     # sum and convert to sqm
@@ -56,7 +57,7 @@ summary_df_perc = summary_df_perc.set_index(keys='state', drop=True)
 # Structure type for the US weighted by the floor area in each state.
 weight = data_FA_Arehart['Weight'].reindex_like(data_FA_Arehart)
 dist_weighted = summary_df_perc.multiply(weight, axis=0)
-dist_weighted = dist_weighted.drop(columns=['Sum_HAZUS'], axis=1)
+dist_weighted = dist_weighted.drop(columns=['Sum_HAZUS'])
 type_weighted = dist_weighted.sum(axis=0)
 # check
 print('Sum of all structure type weights is: ', sum(dist_weighted.sum(axis=0)))

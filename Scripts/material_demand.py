@@ -7,7 +7,7 @@
 # import libraries
 import pandas as pd
 import matplotlib.pyplot as plt
-from odym import dynamic_stock_model as dsm
+from odym.modules import dynamic_stock_model as dsm
 import numpy as np
 import scipy.stats as st
 import seaborn as sns
@@ -683,7 +683,7 @@ def calc_inflow_outflow_stock_mats(area_inflow_2017_2100, area_outflow_2017_2100
 
         # print the material demand for a particular year
         # print_year = 2020
-        if print_year is not 0:
+        if print_year != 0:
             print('Total steel demand in ', str(print_year), ' =   ', steel_tot_inflow['Sum_steel_inflow'][print_year],
                   ' Mt')
             print('Total concrete demand in ', str(print_year), ' =   ', conc_tot_inflow['Sum_conc_inflow'][print_year],
@@ -791,7 +791,7 @@ def calc_inflow_outflow_stock_mats(area_inflow_2017_2100, area_outflow_2017_2100
 
         # print the material demand for a particular year
         # print_year = 2020
-        if print_year is not 0:
+        if print_year != 0:
             print('Total steel outflow in ', str(print_year), ' =   ', steel_tot_outflow['Sum_steel_outflow'][print_year],
                   ' Mt')
             print('Total concrete outflow in ', str(print_year), ' =   ', conc_tot_outflow['Sum_conc_outflow'][print_year],
@@ -894,7 +894,7 @@ def calc_inflow_outflow_stock_mats(area_inflow_2017_2100, area_outflow_2017_2100
 
         # print the material demand for a particular year
         # print_year = 2020
-        if print_year is not 0:
+        if print_year != 0:
             print('Total steel stock in ', str(print_year), ' =   ', steel_tot_stock['Sum_steel_stock'][print_year], ' Mt')
             print('Total concrete stock in ', str(print_year), ' =   ', conc_tot_stock['Sum_conc_stock'][print_year], ' Mt')
             print('Total engineered wood stock in ', str(print_year), ' =   ',

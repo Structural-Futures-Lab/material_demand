@@ -5,6 +5,7 @@
 
 import pandas as pd
 import glob
+import os
 
 data_FA_Arehart = pd.read_excel('./InputData/Floor_Area_Arehart2020.xlsx', sheet_name='by_state')
 data_FA_Arehart = data_FA_Arehart.set_index('state', drop=False)
@@ -17,7 +18,7 @@ file_name = './InputData/HAZUS_Extract/newjersey_type.txt'
 # files = glob.glob(directoryPath+'*occupancy.txt')
 files = glob.glob(directoryPath+'*type.txt')
 for file_name in files:
-    state_str = str.split(str.split(str.split(file_name, '/')[3], '.')[0], '_')[0]
+    state_str = os.path.splitext(os.path.basename(file_name))[0].split('_')[0]
     x = pd.read_csv(file_name, low_memory=False)
     x = x.set_index('Tract', drop=True)
     x_sum = x.sum(axis=0) * 1000 * 0.092903 / 10e6     # sum and convert to sqm
@@ -53,7 +54,7 @@ summary_df_perc = summary_df_perc.set_index(keys='state', drop=True)
 # Structure type for the US weighted by the floor area in each state.
 weight = data_FA_Arehart['Weight'].reindex_like(data_FA_Arehart)
 dist_weighted = summary_df_perc.multiply(weight, axis=0)
-dist_weighted = dist_weighted.drop(columns=['Sum_HAZUS'], axis=1)
+dist_weighted = dist_weighted.drop(columns=['Sum_HAZUS'])
 type_weighted = dist_weighted.sum(axis=0)
 # check
 print('Sum of all structure type weights is: ', sum(dist_weighted.sum(axis=0)))
@@ -101,7 +102,7 @@ my_weights.to_csv('./InputData/HAZUS_weight.csv')
 files = glob.glob(directoryPath+'*occupancy.txt')
 # files = glob.glob(directoryPath+'*type.txt')
 for file_name in files:
-    state_str = str.split(str.split(str.split(file_name, '/')[3], '.')[0], '_')[0]
+    state_str = os.path.splitext(os.path.basename(file_name))[0].split('_')[0]
     x = pd.read_csv(file_name, low_memory=False)
     x = x.set_index('Tract', drop=True)
     x_sum = x.sum(axis=0) * 1000 * 0.092903 / 10e6     # sum and convert to sqm
@@ -137,7 +138,7 @@ summary_df_perc = summary_df_perc.set_index(keys='state', drop=True)
 # Structure type for the US weighted by the floor area in each state.
 weight = data_FA_Arehart['Weight'].reindex_like(data_FA_Arehart)
 dist_weighted = summary_df_perc.multiply(weight, axis=0)
-dist_weighted = dist_weighted.drop(columns=['Sum_HAZUS'], axis=1)
+dist_weighted = dist_weighted.drop(columns=['Sum_HAZUS'])
 type_weighted = dist_weighted.sum(axis=0)
 # check
 print('Sum of all structure type weights is: ', sum(dist_weighted.sum(axis=0)))
@@ -178,17 +179,20 @@ types_df = pd.DataFrame({'weight':type_weighted}).transpose()
 # EDU2 - Colleges/Universities
 
 my_weights_type = (types_df
-              .assign(RES=type_weighted['RES1F'] + type_weighted['RES2F'] + type_weighted['RES3F'] +
-                            type_weighted['RES4F'] + type_weighted['RES5F'] + type_weighted['RES6F'])
+              .assign(RES=type_weighted['RES1F'] + type_weighted['RES2F'] + type_weighted['RES3AF'] +
+                          type_weighted['RES3BF'] + type_weighted['RES3CF'] + type_weighted['RES3DF'] +
+                          type_weighted['RES3EF'] + type_weighted['RES3FF'] + type_weighted['RES4F'] +
+                          type_weighted['RES5F'] + type_weighted['RES6F'])
               .assign(COM=type_weighted['COM1F'] + type_weighted['COM2F'] + type_weighted['COM3F'] +
                           type_weighted['COM4F'] + type_weighted['COM5F'] + type_weighted['COM6F'] +
-                          type_weighted['COM7F'] + type_weighted['COM8F'] + type_weighted['COM9F'] + type_weighted['COM10F'])
+                          type_weighted['COM7F'] + type_weighted['COM8F'] + type_weighted['COM9F'])
               .assign(PUB=type_weighted['REL1F'] + type_weighted['GOV1F'] + type_weighted['GOV2F'] +
                           type_weighted['EDU1F'] + type_weighted['EDU2F'])
 
-              .drop(columns=['RES1F', 'RES2F', 'RES3F', 'RES4F', 'RES5F', 'RES6F', 'COM1F', 'COM2F', 'COM3F',
-                             'COM4F', 'COM5F','COM6F', 'COM7F', 'COM8F', 'COM9F', 'COM10F', 'IND1F', 'IND2F',
-                             'IND3F', 'IND4F', 'IND5F', 'IND6F', 'AGR1F', 'REL1F', 'GOV1F', 'GOV2F' 'EDU1F', 'EDU2F'])
+              .drop(columns=['RES1F', 'RES2F', 'RES3AF', 'RES3BF', 'RES3CF', 'RES3DF', 'RES3EF', 'RES3FF', 'RES4F',
+                             'RES5F', 'RES6F', 'COM1F', 'COM2F', 'COM3F',
+                             'COM4F', 'COM5F','COM6F', 'COM7F', 'COM8F', 'COM9F', 'IND1F', 'IND2F',
+                             'IND3F', 'IND4F', 'IND5F', 'IND6F', 'AGR1F', 'REL1F', 'GOV1F', 'GOV2F', 'EDU1F', 'EDU2F'])
               )
 print('Distribution of buildings into res/com/pub     ', my_weights_type)
 print('Sum of all weights =   ', my_weights_type.sum(axis=1))

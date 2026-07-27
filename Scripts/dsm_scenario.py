@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.interpolate import interp1d
-from odym import dynamic_stock_model as dsm
+from odym.modules import dynamic_stock_model as dsm
 from scipy import stats
 
 # Load in datasets
@@ -58,7 +58,7 @@ def interpolate_population(data_pop=data_pop_UN, data_source='UN', year1=1900, y
             plt3, = plt.plot(years, f_median(years))
             plt4, = plt.plot(years, f_lower_80(years))
             plt5, = plt.plot(years, f_lower_95(years))
-            plt6, = plt.plot([base_year, base_year], [2.4e8, 4.5e8], color='k', LineStyle='--')
+            plt6, = plt.plot([base_year, base_year], [2.4e8, 4.5e8], color='k', linestyle='--')
             plt.legend([plt1, plt2, plt3, plt4, plt5],
                        ['Upper 95th', 'Upper 80th', 'Median', 'Lower 80th', 'Lower 95th'],
                        loc=2)
@@ -118,7 +118,7 @@ def interpolate_population(data_pop=data_pop_UN, data_source='UN', year1=1900, y
             plt3, = plt.plot(years, f_SSP3(years))
             plt4, = plt.plot(years, f_SSP4(years))
             plt5, = plt.plot(years, f_SSP5(years))
-            plt6, = plt.plot([base_year, base_year], [2.4e8, 4.5e8], color='k', LineStyle='--')
+            plt6, = plt.plot([base_year, base_year], [2.4e8, 4.5e8], color='k', linestyle='--')
             plt.legend([plt1, plt2, plt3, plt4, plt5],
                        ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'],
                        loc=2)
@@ -175,7 +175,7 @@ def interpolate_gdp(data_gdp, year1=1900, year2=2100, SSP='SSP1', kind='cubic', 
         plt3, = plt.plot(years, f_SSP3(years))
         plt4, = plt.plot(years, f_SSP4(years))
         plt5, = plt.plot(years, f_SSP5(years))
-        # plt6, = plt.plot([base_year, base_year], [2.4e8, 4.5e8], color='k', LineStyle='--')
+        # plt6, = plt.plot([base_year, base_year], [2.4e8, 4.5e8], color='k', linestyle='--')
         plt.legend([plt1, plt2, plt3, plt4, plt5],
                    ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'],
                    loc=2)
@@ -204,7 +204,7 @@ def FA_elasticity_linear(year1=1900, year2=2100, base_year=2016,
     if plot == True:
         # Plot of population forecasts
         plt1, = plt.plot(FA_elas.Year, FA_elas.FA_elas)
-        plt2, = plt.plot([base_year, base_year], [0, 300], color='k', LineStyle='--')
+        plt2, = plt.plot([base_year, base_year], [0, 300], color='k', linestyle='--')
         plt.xlabel('Year')
         plt.ylabel('Floor Area Elasticity')
         plt.title(plot_name + ' Linear interpolation')
@@ -297,7 +297,7 @@ def FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
             plt3, = plt.plot(df_return.index, df_return.FA_SSP3)
             plt4, = plt.plot(df_return.index, df_return.FA_SSP4)
             plt5, = plt.plot(df_return.index, df_return.FA_SSP5)
-            plt6, = plt.plot([base_year, base_year], [0, max_GFA], color='k', LineStyle='--')
+            plt6, = plt.plot([base_year, base_year], [0, max_GFA], color='k', linestyle='--')
             plt.legend([plt1, plt2, plt3, plt4, plt5],
                        ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=2)
             plt.xlabel('Year')
@@ -357,7 +357,7 @@ def plot_dsm(dsm, plot_name):
     plt.subplot(211)
     max_val = dsm.s.max()
     plt2, = plt.plot(dsm.t, dsm.s)
-    plt4, = plt.plot([base_year, base_year], [0, max_val], color='k', LineStyle='--')
+    plt4, = plt.plot([base_year, base_year], [0, max_val], color='k', linestyle='--')
     plt.legend([plt2], ['Stock'], loc=2)
     plt.xlabel('Year')
     plt.ylabel('Floor Area')
@@ -369,7 +369,7 @@ def plot_dsm(dsm, plot_name):
     max_val = max(dsm.i[1:].max(), dsm.o[1:].max())
     plt1, = plt.plot(dsm.t, dsm.i)
     plt3, = plt.plot(dsm.t, dsm.o)
-    plt4, = plt.plot([base_year, base_year], [0, 1.15 * max_val], color='k', LineStyle='--')
+    plt4, = plt.plot([base_year, base_year], [0, 1.15 * max_val], color='k', linestyle='--')
     plt.xlim(left=dsm.t[0] + 5)
     plt.ylim(top=1.2 * max_val)
     plt.xlabel('Year')
@@ -1082,7 +1082,7 @@ SSP2_sc_df.to_excel(writer, sheet_name='SSP2_sc', index=False)
 SSP3_sc_df.to_excel(writer, sheet_name='SSP3_sc', index=False)
 SSP4_sc_df.to_excel(writer, sheet_name='SSP4_sc', index=False)
 SSP5_sc_df.to_excel(writer, sheet_name='SSP5_sc', index=False)
-writer.save()
+writer.close()
 
 # Plot the material flow analyses
 plot_MFA_all_scenarios = False
@@ -1116,7 +1116,7 @@ if plot_MFA_all_same_graph == True:
     plt2, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.s + SSP2_dsm_com.s + SSP2_dsm_pub.s)
     plt3, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.s + SSP3_dsm_com.s + SSP3_dsm_pub.s)
     plt4, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.s + SSP4_dsm_com.s + SSP4_dsm_pub.s)
-    plt16, = plt.plot([base_year, base_year], [0, 200000], color='k', LineStyle='--')
+    plt16, = plt.plot([base_year, base_year], [0, 200000], color='k', linestyle='--')
 
     plt.legend([plt1, plt2, plt3, plt4], ['SSP1', 'SSP2', 'SSP3', 'SSP4'], loc=(1.05, 0.5))
     # plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
@@ -1129,16 +1129,16 @@ if plot_MFA_all_same_graph == True:
     # plt.show();
 
     plt.subplot(212)
-    plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.i + SSP1_dsm_com.i + SSP1_dsm_pub.i, LineStyle='dashed', color='#1f77b4')
+    plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.i + SSP1_dsm_com.i + SSP1_dsm_pub.i, linestyle='dashed', color='#1f77b4')
     plt2, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.o + SSP1_dsm_com.o + SSP1_dsm_pub.o, color = '#1f77b4')
-    plt3, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.i + SSP2_dsm_com.i + SSP2_dsm_pub.i, LineStyle='dashed', color='#ff7f0e' )
+    plt3, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.i + SSP2_dsm_com.i + SSP2_dsm_pub.i, linestyle='dashed', color='#ff7f0e' )
     plt4, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.o + SSP2_dsm_com.o + SSP2_dsm_pub.o, color='#ff7f0e')
-    plt5, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.i + SSP3_dsm_com.i + SSP3_dsm_pub.i, LineStyle='dashed', color='#2ca02c')
+    plt5, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.i + SSP3_dsm_com.i + SSP3_dsm_pub.i, linestyle='dashed', color='#2ca02c')
     plt6, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.o + SSP3_dsm_com.o + SSP3_dsm_pub.o, color='#2ca02c')
-    plt7, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.i + SSP4_dsm_com.i + SSP4_dsm_pub.i, LineStyle='dashed', color='#d62728')
+    plt7, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.i + SSP4_dsm_com.i + SSP4_dsm_pub.i, linestyle='dashed', color='#d62728')
     plt8, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.o + SSP4_dsm_com.o + SSP4_dsm_pub.o, color='#d62728')
 
-    plt11, = plt.plot([base_year, base_year], [0, 3000], color='k', LineStyle='--')
+    plt11, = plt.plot([base_year, base_year], [0, 3000], color='k', linestyle='--')
 
     plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],
                ['Inflow SSP1', 'Outflow SSP1',
@@ -1164,7 +1164,7 @@ if plot_MFA_all_same_graph == True:
     plt2, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.s)
     plt3, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.s)
     plt4, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.s)
-    plt16, = plt.plot([base_year, base_year], [0, 175000], color='k', LineStyle='--')
+    plt16, = plt.plot([base_year, base_year], [0, 175000], color='k', linestyle='--')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
@@ -1183,21 +1183,21 @@ if plot_MFA_all_same_graph == True:
     # plt.show();
 
     plt.subplot(212)
-    plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.i, LineStyle='dashed', color='#1f77b4')
+    plt1, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.i, linestyle='dashed', color='#1f77b4')
     plt2, = plt.plot(SSP1_dsm_res.t, SSP1_dsm_res.o, color='#1f77b4')
-    plt3, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.i, LineStyle='dashed', color='#ff7f0e' )
+    plt3, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.i, linestyle='dashed', color='#ff7f0e' )
     plt4, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.o, color='#ff7f0e' )
-    plt5, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.i, LineStyle='dashed', color='#2ca02c')
+    plt5, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.i, linestyle='dashed', color='#2ca02c')
     plt6, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.o, color='#2ca02c')
-    plt7, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.i, LineStyle='dashed', color='#d62728')
+    plt7, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.i, linestyle='dashed', color='#d62728')
     plt8, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.o, color='#d62728')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
-        plt9, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.i, LineStyle='dashed')
+        plt9, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.i, linestyle='dashed')
         plt0, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.o)
 
-    plt11, = plt.plot([base_year, base_year], [0, 2500], color='k', LineStyle='--')
+    plt11, = plt.plot([base_year, base_year], [0, 2500], color='k', linestyle='--')
 
     if no_SSP5 == True:
         plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],
@@ -1230,7 +1230,7 @@ if plot_MFA_all_same_graph == True:
     plt2, = plt.plot(SSP2_dsm_com.t, SSP2_dsm_com.s)
     plt3, = plt.plot(SSP3_dsm_com.t, SSP3_dsm_com.s)
     plt4, = plt.plot(SSP4_dsm_com.t, SSP4_dsm_com.s)
-    plt16, = plt.plot([base_year, base_year], [0, 35000], color='k', LineStyle='--')
+    plt16, = plt.plot([base_year, base_year], [0, 35000], color='k', linestyle='--')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
@@ -1249,21 +1249,21 @@ if plot_MFA_all_same_graph == True:
     # plt.show();
 
     plt.subplot(212)
-    plt1, = plt.plot(SSP1_dsm_com.t, SSP1_dsm_com.i, LineStyle='dashed', color='#1f77b4')
+    plt1, = plt.plot(SSP1_dsm_com.t, SSP1_dsm_com.i, linestyle='dashed', color='#1f77b4')
     plt2, = plt.plot(SSP1_dsm_com.t, SSP1_dsm_com.o, color='#1f77b4')
-    plt3, = plt.plot(SSP2_dsm_com.t, SSP2_dsm_com.i, LineStyle='dashed', color='#ff7f0e' )
+    plt3, = plt.plot(SSP2_dsm_com.t, SSP2_dsm_com.i, linestyle='dashed', color='#ff7f0e' )
     plt4, = plt.plot(SSP2_dsm_com.t, SSP2_dsm_com.o, color='#ff7f0e' )
-    plt5, = plt.plot(SSP3_dsm_com.t, SSP3_dsm_com.i, LineStyle='dashed',color='#2ca02c')
+    plt5, = plt.plot(SSP3_dsm_com.t, SSP3_dsm_com.i, linestyle='dashed',color='#2ca02c')
     plt6, = plt.plot(SSP3_dsm_com.t, SSP3_dsm_com.o, color='#2ca02c')
-    plt7, = plt.plot(SSP4_dsm_com.t, SSP4_dsm_com.i, LineStyle='dashed', color='#d62728')
+    plt7, = plt.plot(SSP4_dsm_com.t, SSP4_dsm_com.i, linestyle='dashed', color='#d62728')
     plt8, = plt.plot(SSP4_dsm_com.t, SSP4_dsm_com.o, color='#d62728')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
-        plt9, = plt.plot(SSP5_dsm_com.t, SSP5_dsm_com.i, LineStyle='dashed')
+        plt9, = plt.plot(SSP5_dsm_com.t, SSP5_dsm_com.i, linestyle='dashed')
         plt0, = plt.plot(SSP5_dsm_com.t, SSP5_dsm_com.o)
 
-    plt11, = plt.plot([base_year, base_year], [0, 600], color='k', LineStyle='--')
+    plt11, = plt.plot([base_year, base_year], [0, 600], color='k', linestyle='--')
 
     if no_SSP5 == True:
         plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],
@@ -1296,7 +1296,7 @@ if plot_MFA_all_same_graph == True:
     plt2, = plt.plot(SSP2_dsm_pub.t, SSP2_dsm_pub.s)
     plt3, = plt.plot(SSP3_dsm_pub.t, SSP3_dsm_pub.s)
     plt4, = plt.plot(SSP4_dsm_pub.t, SSP4_dsm_pub.s)
-    plt16, = plt.plot([base_year, base_year], [0, 6500], color='k', LineStyle='--')
+    plt16, = plt.plot([base_year, base_year], [0, 6500], color='k', linestyle='--')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
@@ -1315,21 +1315,21 @@ if plot_MFA_all_same_graph == True:
     # plt.show();
 
     plt.subplot(212)
-    plt1, = plt.plot(SSP1_dsm_pub.t, SSP1_dsm_pub.i, LineStyle='dashed', color='#1f77b4')
+    plt1, = plt.plot(SSP1_dsm_pub.t, SSP1_dsm_pub.i, linestyle='dashed', color='#1f77b4')
     plt2, = plt.plot(SSP1_dsm_pub.t, SSP1_dsm_pub.o, color='#1f77b4')
-    plt3, = plt.plot(SSP2_dsm_pub.t, SSP2_dsm_pub.i, LineStyle='dashed', color='#ff7f0e' )
+    plt3, = plt.plot(SSP2_dsm_pub.t, SSP2_dsm_pub.i, linestyle='dashed', color='#ff7f0e' )
     plt4, = plt.plot(SSP2_dsm_pub.t, SSP2_dsm_pub.o, color='#ff7f0e' )
-    plt5, = plt.plot(SSP3_dsm_pub.t, SSP3_dsm_pub.i, LineStyle='dashed', color='#2ca02c')
+    plt5, = plt.plot(SSP3_dsm_pub.t, SSP3_dsm_pub.i, linestyle='dashed', color='#2ca02c')
     plt6, = plt.plot(SSP3_dsm_pub.t, SSP3_dsm_pub.o, color='#2ca02c')
-    plt7, = plt.plot(SSP4_dsm_pub.t, SSP4_dsm_pub.i, LineStyle='dashed', color='#d62728')
+    plt7, = plt.plot(SSP4_dsm_pub.t, SSP4_dsm_pub.i, linestyle='dashed', color='#d62728')
     plt8, = plt.plot(SSP4_dsm_pub.t, SSP4_dsm_pub.o, color='#d62728')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
-        plt9, = plt.plot(SSP5_dsm_pub.t, SSP5_dsm_pub.i, LineStyle='dashed')
+        plt9, = plt.plot(SSP5_dsm_pub.t, SSP5_dsm_pub.i, linestyle='dashed')
         plt0, = plt.plot(SSP5_dsm_pub.t, SSP5_dsm_pub.o)
 
-    plt11, = plt.plot([base_year, base_year], [0, 100], color='k', LineStyle='--')
+    plt11, = plt.plot([base_year, base_year], [0, 100], color='k', linestyle='--')
 
     if no_SSP5 == True:
         plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],

@@ -101,7 +101,7 @@ def create_dyn_inventory_scenario(mat_flow_in,mat_flow_out,scenario_name,include
             t = np.linspace(year_vec[0], year_vec[-1], num=(year_vec[-1] - year_vec[0] + 1), endpoint=True)
             y = A + (B - A) / (1 +  np.exp(-growth_rate * (t-M)))
             result_pre = pd.DataFrame({year_label:y}).diff()
-            result_pre[year_label][0] = 0
+            result_pre.loc[0, year_label] = 0
             result = result_pre[year_label]
         return result
 
@@ -115,8 +115,8 @@ def create_dyn_inventory_scenario(mat_flow_in,mat_flow_out,scenario_name,include
         regrowth_dimlum_i = - mat_flow_in.loc[i[0]]['Sum_dimlum_inflow'] * biomass_regrowth_i(years=year_vec, year_label=(i[0]), rot_period=rot_period_dimlum, bio_CO2_coeff=ECC_bio_wood, curve='Richards')
         regrowth_glulam_i = - mat_flow_in.loc[i[0]]['Sum_engwood_inflow'] * biomass_regrowth_i(years=year_vec, year_label=(i[0]), rot_period=rot_period_glulam, bio_CO2_coeff=ECC_bio_wood, curve='Richards')
         # append to the large dataframe
-        regrowth_dimlum_all = regrowth_dimlum_all.append(regrowth_dimlum_i)
-        regrowth_glulam_all = regrowth_glulam_all.append(regrowth_glulam_i)
+        regrowth_dimlum_all = pd.concat([regrowth_dimlum_all, regrowth_dimlum_i.to_frame().T])
+        regrowth_glulam_all = pd.concat([regrowth_glulam_all, regrowth_glulam_i.to_frame().T])
 
     # Transpose the dataframe
     regrowth_dimlum_all_T = regrowth_dimlum_all.T
@@ -181,7 +181,7 @@ def create_dyn_inventory_scenario(mat_flow_in,mat_flow_out,scenario_name,include
             # end of life (eol) carbonation
             #   assume all is crushed to 10cm spheres
             diam_sphere = 0.1   # m
-            volume_remain = SA_i*wall_thickness - int(df_carb_service['V_c'][-1:])
+            volume_remain = SA_i*wall_thickness - int(df_carb_service['V_c'].iloc[-1])
             V_sphere = 4/3 * np.pi * (diam_sphere/2) ** 3
             n_sphere = volume_remain / V_sphere
             SA_i_eol = 4 * np.pi * (diam_sphere/2) ** 2 * n_sphere
@@ -226,7 +226,7 @@ def create_dyn_inventory_scenario(mat_flow_in,mat_flow_out,scenario_name,include
             carb_concrete_i = - carb_uptake(years=year_vec, year_label=i[0],mass_in=mat_flow_in['Sum_conc_inflow'], mass_out=mat_flow_out['Sum_conc_outflow'], service_life=60)
             counter = counter + 1
             # append to the large dataframe
-            carb_concrete = carb_concrete.append(carb_concrete_i)
+            carb_concrete = pd.concat([carb_concrete, carb_concrete_i.to_frame().T])
 
         carb_concerete_T = carb_concrete.T
         # Shift cohort down to appropriate "carbon-year"
@@ -288,8 +288,8 @@ def create_dyn_inventory_scenario(mat_flow_in,mat_flow_out,scenario_name,include
     CO2_flux_total = CO2_flux_cradle_to_gate_total + CO2_flux_eol_total
 
     # Extend flux to go to year 500
-    CO2_flux_total_ext = CO2_flux_total.append(pd.DataFrame(np.zeros((417, 1)))).reset_index(drop=True)
-    CH4_flux_cradle_to_gate_total_ext = CH4_flux_cradle_to_gate_total.append(pd.DataFrame(np.zeros((417, 1)))).reset_index(drop=True)
+    CO2_flux_total_ext = pd.concat([CO2_flux_total, pd.DataFrame(np.zeros((417, 1)))]).reset_index(drop=True)
+    CH4_flux_cradle_to_gate_total_ext = pd.concat([CH4_flux_cradle_to_gate_total, pd.DataFrame(np.zeros((417, 1)))]).reset_index(drop=True)
 
     # Add in carbon uptake
     if include_carb == True:
@@ -556,7 +556,7 @@ def DLCA_calc(input_flux, time_horizon=100):
     CH4_flux = input_flux['CH4_flux']
 
     # Cumulative net emissions [kg]
-    cum_net_emissions = pd.DataFrame(0, index=year_vec,
+    cum_net_emissions = pd.DataFrame(0.0, index=year_vec,
                                      columns=['CO2_net', 'CH4_net', 'gas1_net', 'gas2_net', 'gas3_net'])
     for index, row in cum_net_emissions.iterrows():
         if index == 0:
@@ -569,11 +569,11 @@ def DLCA_calc(input_flux, time_horizon=100):
             # Add in new gases too here
 
         # Initialize mass in atmosphere dataframe
-    mass_in_atm_df = pd.DataFrame(0, index=year_vec, columns=['CO2', 'CH4'])
+    mass_in_atm_df = pd.DataFrame(0.0, index=year_vec, columns=['CO2', 'CH4'])
     # Initialize CO2 atmospheric decay components dataframe
-    CO2_mass_df = pd.DataFrame(0, index=year_vec, columns=['mass0', 'mass1', 'mass2', 'mass3', 'CH4_to_CO2'])
+    CO2_mass_df = pd.DataFrame(0.0, index=year_vec, columns=['mass0', 'mass1', 'mass2', 'mass3', 'CH4_to_CO2'])
     # Initialize radiative forcing dataframe
-    irf_df = pd.DataFrame(0, index=year_vec, columns=['CO2_radfor', 'CH4_radfor', 'CO2_IRF', 'CH4_IRF', 'IRF_all'])
+    irf_df = pd.DataFrame(0.0, index=year_vec, columns=['CO2_radfor', 'CH4_radfor', 'CO2_IRF', 'CH4_IRF', 'IRF_all'])
 
     # Calculate the Mass Decay
     for index, row in mass_in_atm_df.iterrows():
@@ -628,7 +628,7 @@ def DLCA_calc(input_flux, time_horizon=100):
 
     # Temperature change components (two-part climate response model)
     # Initialize the temperature change dataframe
-    temp_change_df = pd.DataFrame(0, index=year_vec,
+    temp_change_df = pd.DataFrame(0.0, index=year_vec,
                                   columns=['CO2_temp_s1', 'CO2_temp_s2', 'CH4_temp_s1', 'CH4_temp_s2', 'CO2_temp',
                                            'CH4_temp', 'temp_change'])
     for index, row in temp_change_df.iterrows():
@@ -684,7 +684,7 @@ def DLCA_calc(input_flux, time_horizon=100):
     # AGTP_df_sup = pd.read_excel('./DLCA_supp_data.xlsx', sheet_name='AGTP', index_col='year')  # [delta-K]
 
     # AGWP and AGTP in reverse-order from year X (the time-horizon)
-    AGWP_AGTP_rev = pd.DataFrame(0, index=year_vec,
+    AGWP_AGTP_rev = pd.DataFrame(0.0, index=year_vec,
                                  columns=['CO2_AGWP_rev', 'CH4_AGWP_rev', 'CO2_AGTP_rev', 'CH4_AGTP_rev'])
     AGWP_AGTP_rev['CO2_AGWP_rev'] = pd.concat(
         (AGWP_df_sup.loc[0:time_horizon, 'CO2_AGWP'][::-1], pd.Series(year_vec[time_horizon + 1:] * 0))).reset_index(
@@ -700,9 +700,9 @@ def DLCA_calc(input_flux, time_horizon=100):
         drop=True)
 
     # Equivalency summary dataframe
-    # equiv_df = pd.DataFrame(0, index=year_vec, columns=['irf_GWP_slidingTH', 'GTP_slidingTH', 'CO2_AGTP_rev', 'CH4_AGTP_rev'])
+    # equiv_df = pd.DataFrame(0.0, index=year_vec, columns=['irf_GWP_slidingTH', 'GTP_slidingTH', 'CO2_AGTP_rev', 'CH4_AGTP_rev'])
 
-    equiv_df = pd.DataFrame(0, index=year_vec, columns=['LCA_dyn', 'LCA_static'])
+    equiv_df = pd.DataFrame(0.0, index=year_vec, columns=['LCA_dyn', 'LCA_static'])
     equiv_df['LCA_dyn'] = irf_df['IRF_all'] / AGWP_CO2
     equiv_df['LCA_static'] = cum_net_emissions['CO2_net'] + cum_net_emissions[
         'CH4_net'] * GWP_CH4  # add in more gasses here if desired
