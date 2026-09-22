@@ -18,7 +18,7 @@ total_area = 0
 # Manipulate and output data by residential, commercial, public, and industrial
 
 # file_name = './InputData/HAZUS_Extract/newjersey_type.txt'
-files = glob.glob(directoryPath+'*occupancy.txt')
+files = glob.glob(directoryPath+'*massachusettes_occupancy.txt')
 # files = glob.glob(directoryPath+'*type.txt')
 for file_name in files:
     state_str = os.path.splitext(os.path.basename(file_name))[0].split('_')[0]
@@ -55,7 +55,7 @@ summary_df_perc = summary_df_perc.set_index(keys='state', drop=True)
 # df = df.sort_values('state', ascending=True)
 
 # Structure type for the US weighted by the floor area in each state.
-weight = data_FA_Arehart['Weight'].reindex_like(data_FA_Arehart)
+weight = pd.Series(1.0, index=data_FA_Arehart.index)
 dist_weighted = summary_df_perc.multiply(weight, axis=0)
 dist_weighted = dist_weighted.drop(columns=['Sum_HAZUS'])
 type_weighted = dist_weighted.sum(axis=0)

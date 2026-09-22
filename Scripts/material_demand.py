@@ -57,7 +57,7 @@ scenario_df = scenario_df.set_index('Scenario')
 
 ## ----------------------------------------------------------------------------------------------------
 # set years series
-years_future = FA_dsm_SSP1['time'].iloc[197:]       #2017 is 197
+years_future = FA_dsm_SSP1['time'].iloc[20:]       # 2017 is index 20 (1997 start)
 years_all = FA_dsm_SSP1.index.to_series()
 
 ## ----------------------------------------------------------------------------------------------------
@@ -227,7 +227,7 @@ def determine_outflow_existing_bldgs(FA_sc_SSP, lt, plot=True, plot_title=''):
      Key assumption is that construction techniques are the same each year. '''
 
     # compute an outflow for the existing stock using a "compute evolution from initial stock method"
-    def determine_outflow_by_ss(lt=lt_dummy, FA_sc_df=FA_sc_SSP, switch_year=196, frac_stock=1.0):
+    def determine_outflow_by_ss(lt=lt_dummy, FA_sc_df=FA_sc_SSP, switch_year=19, frac_stock=1.0):
         '''Compute the outflow of the existing building stock with no additional inflow.
         A switch year of 196 represents 2016.
         frac_stock is the ratio of the exisitng building stock that is a particular structural system.
@@ -246,21 +246,21 @@ def determine_outflow_existing_bldgs(FA_sc_SSP, lt, plot=True, plot_title=''):
         outflow_df = pd.DataFrame({'time': DSM_existing_stock.t, 'outflow': O, 'stock': S})
         return outflow_df
 
-    existing_outflow_total = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=196,
+    existing_outflow_total = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=19,
                                                      frac_stock=1.0)
-    existing_outflow_LF_wood = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=196,
+    existing_outflow_LF_wood = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=19,
                                                        frac_stock=structure_data_historical.LF_wood[0])
-    existing_outflow_Mass_Timber = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=196,
+    existing_outflow_Mass_Timber = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=19,
                                                            frac_stock=structure_data_historical.Mass_Timber[0])
-    existing_outflow_Steel = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=196,
+    existing_outflow_Steel = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=19,
                                                      frac_stock=structure_data_historical.Steel[0])
-    existing_outflow_RC = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=196,
+    existing_outflow_RC = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=19,
                                                   frac_stock=structure_data_historical.RC[0])
-    existing_outflow_RM = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=196,
+    existing_outflow_RM = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=19,
                                                   frac_stock=structure_data_historical.RM[0])
-    existing_outflow_URM = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=196,
+    existing_outflow_URM = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=19,
                                                    frac_stock=structure_data_historical.URM[0])
-    existing_outflow_MH = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=196,
+    existing_outflow_MH = determine_outflow_by_ss(lt=lt, FA_sc_df=FA_sc_SSP, switch_year=19,
                                                   frac_stock=structure_data_historical.MH[0])
 
     existing_outflow_all = pd.DataFrame({
@@ -287,17 +287,17 @@ def determine_outflow_existing_bldgs(FA_sc_SSP, lt, plot=True, plot_title=''):
         existing_outflow = existing_outflow_all.loc[:, existing_outflow_all.columns.str.contains('outflow')]
         existing_stock = existing_outflow_all.loc[:, existing_outflow_all.columns.str.contains('stock')]
 
-        existing_outflow.iloc[197:].plot.line()
+        existing_outflow.iloc[20:].plot.line()
         plt.ylabel('Floor Area (Mm2)')
         plt.title(plot_title + ': Outflow of Buildings Constructed before 2017')
         plt.show();
 
-        existing_stock.iloc[197:].plot.line()
+        existing_stock.iloc[20:].plot.line()
         plt.ylabel('Floor Area (Mm2)')
         plt.title(plot_title + ': Stock of Buildings Constructed before 2017')
         plt.show();
 
-        # existing_outflow_all.iloc[197:].plot.line()
+        # existing_outflow_all.iloc[20:].plot.line()
         # plt.ylabel('Floor Area (Mm2)')
         # plt.title(plot_title + ': Outflow of Buildings Constructed before 2017')
         # plt.show()
@@ -2101,3 +2101,6 @@ if check_stocks == True:
 
 
 ## Next steps
+
+# keep the final material figure(s) open until closed
+plt.show()

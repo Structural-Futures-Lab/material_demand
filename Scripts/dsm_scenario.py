@@ -9,10 +9,24 @@ from scipy.interpolate import interp1d
 from odym.modules import dynamic_stock_model as dsm
 from scipy import stats
 
+# --- MA run plot styling: prevent stacked-subplot title/label overlap; sensible default size ---
+plt.rcParams['figure.figsize'] = (10, 7)
+plt.rcParams['figure.constrained_layout.use'] = True
+
+def _dg(yrs, y, gap=False):
+    # Plot-only helper: blank the 1997 cold-start point, and (gap=True) the 2026-2029
+    # interpolation bridge, so historic vs SSP-projection segments don't connect.
+    yr = np.asarray(yrs, dtype=float); ya = np.array(y, dtype=float)
+    m = (yr == 1997)
+    if gap:
+        m |= (yr >= 2026) & (yr <= 2029)
+    ya[m] = np.nan
+    return ya
+
 # Load in datasets
-data_pop_WiC = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='US_pop_WiC')
+data_pop_WiC = pd.read_excel('./InputData/MA_model_inputs.xlsx', sheet_name='final pop data')
 data_pop_UN = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='US_pop_UN')
-data_gdp = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='GDP_pc')
+data_gdp = pd.read_excel('./InputData/MA_model_inputs.xlsx', sheet_name='final gdp data')
 RECS_Weights = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='res_weight')
 CBECS_Weights = pd.read_excel('./InputData/Pop_Data.xlsx', sheet_name='com_weight')
 
@@ -58,13 +72,13 @@ def interpolate_population(data_pop=data_pop_UN, data_source='UN', year1=1900, y
             plt3, = plt.plot(years, f_median(years))
             plt4, = plt.plot(years, f_lower_80(years))
             plt5, = plt.plot(years, f_lower_95(years))
-            plt6, = plt.plot([base_year, base_year], [2.4e8, 4.5e8], color='k', linestyle='--')
+            plt.axvline(base_year, color='k', linestyle='--')
             plt.legend([plt1, plt2, plt3, plt4, plt5],
                        ['Upper 95th', 'Upper 80th', 'Median', 'Lower 80th', 'Lower 95th'],
                        loc=2)
             plt.xlabel('Year')
-            plt.ylabel('US Population')
-            plt.title('Historical and Forecast of Population in the US (US Census and UN)')
+            plt.ylabel('Massachusetts Population')
+            plt.title('Historical and Forecast of Population in Massachusetts (Census and UN)')
             plt.show();
     elif data_source=='WiC':
         # Create interpolations for population
@@ -113,18 +127,18 @@ def interpolate_population(data_pop=data_pop_UN, data_source='UN', year1=1900, y
 
         if plot == True:
             # Plot of population forecasts
-            plt1, = plt.plot(years, f_SSP1(years))
-            plt2, = plt.plot(years, f_SSP2(years))
-            plt3, = plt.plot(years, f_SSP3(years))
-            plt4, = plt.plot(years, f_SSP4(years))
-            plt5, = plt.plot(years, f_SSP5(years))
-            plt6, = plt.plot([base_year, base_year], [2.4e8, 4.5e8], color='k', linestyle='--')
+            plt1, = plt.plot(years, _dg(years, f_SSP1(years), gap=True))
+            plt2, = plt.plot(years, _dg(years, f_SSP2(years), gap=True))
+            plt3, = plt.plot(years, _dg(years, f_SSP3(years), gap=True))
+            plt4, = plt.plot(years, _dg(years, f_SSP4(years), gap=True))
+            plt5, = plt.plot(years, _dg(years, f_SSP5(years), gap=True))
+            plt.axvline(base_year, color='k', linestyle='--')
             plt.legend([plt1, plt2, plt3, plt4, plt5],
                        ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'],
                        loc=2)
             plt.xlabel('Year')
-            plt.ylabel('US Population')
-            plt.title(r'Historical and Forecast of Population in the US' + '\n' + '(Census and WiC)')
+            plt.ylabel('Massachusetts Population')
+            plt.title(r'Historical and Forecast of Population in Massachusetts' + '\n' + '(historical + SSP)')
             plt.show();
 
     return years, US_pop_years
@@ -170,18 +184,18 @@ def interpolate_gdp(data_gdp, year1=1900, year2=2100, SSP='SSP1', kind='cubic', 
 
     if plot == True:
         # Plot of population forecasts
-        plt1, = plt.plot(years, f_SSP1(years))
-        plt2, = plt.plot(years, f_SSP2(years))
-        plt3, = plt.plot(years, f_SSP3(years))
-        plt4, = plt.plot(years, f_SSP4(years))
-        plt5, = plt.plot(years, f_SSP5(years))
+        plt1, = plt.plot(years, _dg(years, f_SSP1(years), gap=True))
+        plt2, = plt.plot(years, _dg(years, f_SSP2(years), gap=True))
+        plt3, = plt.plot(years, _dg(years, f_SSP3(years), gap=True))
+        plt4, = plt.plot(years, _dg(years, f_SSP4(years), gap=True))
+        plt5, = plt.plot(years, _dg(years, f_SSP5(years), gap=True))
         # plt6, = plt.plot([base_year, base_year], [2.4e8, 4.5e8], color='k', linestyle='--')
         plt.legend([plt1, plt2, plt3, plt4, plt5],
                    ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'],
                    loc=2)
         plt.xlabel('Year')
-        plt.ylabel('US GDP per capita')
-        plt.title('Historical and Forecast of per-capita GDP in the US')
+        plt.ylabel('Massachusetts GDP per capita')
+        plt.title('Historical and Forecast of per-capita GDP in Massachusetts')
         plt.show();
 
     return US_gdp_years
@@ -292,11 +306,11 @@ def FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
         if plot == True:
             # Plot GFA vs time.
             max_GFA = max(FA_SSP1.FA_elas_SSP1.max(), FA_SSP2.FA_elas_SSP2.max(), FA_SSP3.FA_elas_SSP3.max(), FA_SSP4.FA_elas_SSP4.max(), FA_SSP5.FA_elas_SSP5.max())
-            plt1, = plt.plot(df_return.index, df_return.FA_SSP1)
-            plt2, = plt.plot(df_return.index, df_return.FA_SSP2)
-            plt3, = plt.plot(df_return.index, df_return.FA_SSP3)
-            plt4, = plt.plot(df_return.index, df_return.FA_SSP4)
-            plt5, = plt.plot(df_return.index, df_return.FA_SSP5)
+            plt1, = plt.plot(df_return.index, _dg(df_return.index, df_return.FA_SSP1, gap=True))
+            plt2, = plt.plot(df_return.index, _dg(df_return.index, df_return.FA_SSP2, gap=True))
+            plt3, = plt.plot(df_return.index, _dg(df_return.index, df_return.FA_SSP3, gap=True))
+            plt4, = plt.plot(df_return.index, _dg(df_return.index, df_return.FA_SSP4, gap=True))
+            plt5, = plt.plot(df_return.index, _dg(df_return.index, df_return.FA_SSP5, gap=True))
             plt6, = plt.plot([base_year, base_year], [0, max_GFA], color='k', linestyle='--')
             plt.legend([plt1, plt2, plt3, plt4, plt5],
                        ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=2)
@@ -305,11 +319,11 @@ def FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
             plt.title('Floor Area Elasticity for various SSPs')
             plt.show();
             # Plot GFA vs GDP.
-            plt1, = plt.plot(df_return.US_gdp_SSP1, df_return.FA_SSP1)
-            plt2, = plt.plot(df_return.US_gdp_SSP2, df_return.FA_SSP2)
-            plt3, = plt.plot(df_return.US_gdp_SSP3, df_return.FA_SSP3)
-            plt4, = plt.plot(df_return.US_gdp_SSP4, df_return.FA_SSP4)
-            plt5, = plt.plot(df_return.US_gdp_SSP5, df_return.FA_SSP5)
+            plt1, = plt.plot(df_return.US_gdp_SSP1, _dg(df_return.index, df_return.FA_SSP1, gap=True))
+            plt2, = plt.plot(df_return.US_gdp_SSP2, _dg(df_return.index, df_return.FA_SSP2, gap=True))
+            plt3, = plt.plot(df_return.US_gdp_SSP3, _dg(df_return.index, df_return.FA_SSP3, gap=True))
+            plt4, = plt.plot(df_return.US_gdp_SSP4, _dg(df_return.index, df_return.FA_SSP4, gap=True))
+            plt5, = plt.plot(df_return.US_gdp_SSP5, _dg(df_return.index, df_return.FA_SSP5, gap=True))
             plt.legend([plt1, plt2, plt3, plt4, plt5],
                        ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=2)
             plt.xlabel('GDP')
@@ -329,9 +343,9 @@ def FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
     #                         }, )
 
 # Time period input variables
-year1 = 1820
+year1 = 1997
 year2 = 2100
-base_year = 2016
+base_year = 2020
 
 # interpolate population data for the US.
 years, US_pop = interpolate_population(data_pop=data_pop_WiC, data_source='WiC', year1=year1, year2=year2, proj='All', plot=True)
@@ -340,7 +354,7 @@ years, US_pop = interpolate_population(data_pop=data_pop_WiC, data_source='WiC',
 US_gdp = interpolate_gdp(data_gdp, year1=year1, year2=year2, SSP='All', kind='cubic', plot=True)
 # calculate total floor area elasticity
 FA_all = FA_elasticity_EDGE(US_gdp, US_pop, SSP='All',
-                       base_year=2016,FA_base_year=246, Area_country=8081867, gamma=-0.03,
+                       base_year=2020,FA_base_year=100.7, Area_country=20202, gamma=-0.03,
                        plot=True)      # area of continguous 48 = 8081867, area of all = 9833517
 
 
@@ -349,9 +363,9 @@ US_gdp = US_gdp.set_index('Year', drop=False)
 
 
 # ratio of residential floor area to total floor area:
-ratio_res = 0.773497
-ratio_com = 0.142467
-ratio_pub = 0.030018
+ratio_res = 0.724062
+ratio_com = 0.179763
+ratio_pub = 0.034883
 
 def plot_dsm(dsm, plot_name):
     plt.subplot(211)
@@ -545,8 +559,8 @@ SSP5_dsm_res, SSP5_dsm_com, SSP5_dsm_pub, SSP5_MFA_input = calc_MFA('SSP5', lt_r
 n_bins = 15
 kde_flag = True
 rug_flag = False
-RECS_comparison = True
-CBECS_comparison = True
+RECS_comparison = False
+CBECS_comparison = False
 plot_all = True
 
 # Plot all RECS data against the DSM simulation distribution
@@ -1108,6 +1122,11 @@ else:
 
 # # ----------------------------------------------------------------------------------------------------------------------
 # # Plot all scenarios together for all buildings
+# --- plotting only: blank the 1997 cold-start point (the whole existing stock is
+# --- dumped into year one); the Excel results above are unaffected.
+for _d in [SSP1_dsm_res, SSP1_dsm_com, SSP1_dsm_pub, SSP2_dsm_res, SSP2_dsm_com, SSP2_dsm_pub,
+           SSP3_dsm_res, SSP3_dsm_com, SSP3_dsm_pub, SSP4_dsm_res, SSP4_dsm_com, SSP4_dsm_pub]:
+    _d.i[0] = np.nan; _d.o[0] = np.nan; _d.s[0] = np.nan
 plot_MFA_all_same_graph = True
 no_SSP5 = True      # True for ignoring SSP5, False for including SSP5
 if plot_MFA_all_same_graph == True:
@@ -1116,12 +1135,11 @@ if plot_MFA_all_same_graph == True:
     plt2, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.s + SSP2_dsm_com.s + SSP2_dsm_pub.s)
     plt3, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.s + SSP3_dsm_com.s + SSP3_dsm_pub.s)
     plt4, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.s + SSP4_dsm_com.s + SSP4_dsm_pub.s)
-    plt16, = plt.plot([base_year, base_year], [0, 200000], color='k', linestyle='--')
+    plt.axvline(base_year, color='k', linestyle='--')
 
     plt.legend([plt1, plt2, plt3, plt4], ['SSP1', 'SSP2', 'SSP3', 'SSP4'], loc=(1.05, 0.5))
     # plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
     # plt.legend(loc=(1.05, 0.5))
-    plt.tight_layout()
     plt.xlabel('Year')
     plt.xlim(left=1980)
     plt.ylabel('million $m^2$')
@@ -1138,7 +1156,7 @@ if plot_MFA_all_same_graph == True:
     plt7, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.i + SSP4_dsm_com.i + SSP4_dsm_pub.i, linestyle='dashed', color='#d62728')
     plt8, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.o + SSP4_dsm_com.o + SSP4_dsm_pub.o, color='#d62728')
 
-    plt11, = plt.plot([base_year, base_year], [0, 3000], color='k', linestyle='--')
+    plt.axvline(base_year, color='k', linestyle='--')
 
     plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],
                ['Inflow SSP1', 'Outflow SSP1',
@@ -1164,7 +1182,7 @@ if plot_MFA_all_same_graph == True:
     plt2, = plt.plot(SSP2_dsm_res.t, SSP2_dsm_res.s)
     plt3, = plt.plot(SSP3_dsm_res.t, SSP3_dsm_res.s)
     plt4, = plt.plot(SSP4_dsm_res.t, SSP4_dsm_res.s)
-    plt16, = plt.plot([base_year, base_year], [0, 175000], color='k', linestyle='--')
+    plt.axvline(base_year, color='k', linestyle='--')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
@@ -1175,7 +1193,6 @@ if plot_MFA_all_same_graph == True:
         plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
     # plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
     # plt.legend(loc=(1.05, 0.5))
-    plt.tight_layout()
     plt.xlabel('Year')
     plt.xlim(left=1980)
     plt.ylabel('million $m^2$')
@@ -1197,7 +1214,7 @@ if plot_MFA_all_same_graph == True:
         plt9, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.i, linestyle='dashed')
         plt0, = plt.plot(SSP5_dsm_res.t, SSP5_dsm_res.o)
 
-    plt11, = plt.plot([base_year, base_year], [0, 2500], color='k', linestyle='--')
+    plt.axvline(base_year, color='k', linestyle='--')
 
     if no_SSP5 == True:
         plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],
@@ -1230,7 +1247,7 @@ if plot_MFA_all_same_graph == True:
     plt2, = plt.plot(SSP2_dsm_com.t, SSP2_dsm_com.s)
     plt3, = plt.plot(SSP3_dsm_com.t, SSP3_dsm_com.s)
     plt4, = plt.plot(SSP4_dsm_com.t, SSP4_dsm_com.s)
-    plt16, = plt.plot([base_year, base_year], [0, 35000], color='k', linestyle='--')
+    plt.axvline(base_year, color='k', linestyle='--')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
@@ -1241,7 +1258,6 @@ if plot_MFA_all_same_graph == True:
         plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
     # plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
     # plt.legend(loc=(1.05, 0.5))
-    plt.tight_layout()
     plt.xlim(left=1980)
     plt.xlabel('Year')
     plt.ylabel('million $m^2$')
@@ -1263,7 +1279,7 @@ if plot_MFA_all_same_graph == True:
         plt9, = plt.plot(SSP5_dsm_com.t, SSP5_dsm_com.i, linestyle='dashed')
         plt0, = plt.plot(SSP5_dsm_com.t, SSP5_dsm_com.o)
 
-    plt11, = plt.plot([base_year, base_year], [0, 600], color='k', linestyle='--')
+    plt.axvline(base_year, color='k', linestyle='--')
 
     if no_SSP5 == True:
         plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],
@@ -1296,7 +1312,7 @@ if plot_MFA_all_same_graph == True:
     plt2, = plt.plot(SSP2_dsm_pub.t, SSP2_dsm_pub.s)
     plt3, = plt.plot(SSP3_dsm_pub.t, SSP3_dsm_pub.s)
     plt4, = plt.plot(SSP4_dsm_pub.t, SSP4_dsm_pub.s)
-    plt16, = plt.plot([base_year, base_year], [0, 6500], color='k', linestyle='--')
+    plt.axvline(base_year, color='k', linestyle='--')
     if no_SSP5 == True:
         temp = 'bleh'
     else:
@@ -1307,7 +1323,6 @@ if plot_MFA_all_same_graph == True:
         plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
     # plt.legend([plt1, plt2, plt3, plt4, plt5], ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5'], loc=(1.05, 0.5))
     # plt.legend(loc=(1.05, 0.5))
-    plt.tight_layout()
     plt.xlabel('Year')
     plt.xlim(left=1980)
     plt.ylabel('million $m^2$ ')
@@ -1329,7 +1344,7 @@ if plot_MFA_all_same_graph == True:
         plt9, = plt.plot(SSP5_dsm_pub.t, SSP5_dsm_pub.i, linestyle='dashed')
         plt0, = plt.plot(SSP5_dsm_pub.t, SSP5_dsm_pub.o)
 
-    plt11, = plt.plot([base_year, base_year], [0, 100], color='k', linestyle='--')
+    plt.axvline(base_year, color='k', linestyle='--')
 
     if no_SSP5 == True:
         plt.legend([plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8],

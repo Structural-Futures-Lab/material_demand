@@ -1,0 +1,17 @@
+# Large source data — NOT stored in git (re-downloadable from the original providers)
+*.tif
+*.tiff
+*.7z
+*.gpkg
+*.gz
+*.zip
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+
+# OS / editor
+.DS_Store
+~$*

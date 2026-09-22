@@ -1054,5 +1054,8 @@ plt.ylabel('Instantaneous Radiative Forcing ($W/m^2$)')
 
 # plt.savefig('./Figures/DLCA/DLCA_output_inst_rf.png', dpi=240)
 
+# display all figures built above
+plt.show()
+
 
 

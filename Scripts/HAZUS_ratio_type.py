@@ -16,7 +16,7 @@ total_area = 0
 
 file_name = './InputData/HAZUS_Extract/newjersey_type.txt'
 # files = glob.glob(directoryPath+'*occupancy.txt')
-files = glob.glob(directoryPath+'*type.txt')
+files = glob.glob(directoryPath+'*massachusettes_type.txt')
 for file_name in files:
     state_str = os.path.splitext(os.path.basename(file_name))[0].split('_')[0]
     x = pd.read_csv(file_name, low_memory=False)
@@ -52,14 +52,15 @@ summary_df_perc = summary_df_perc.set_index(keys='state', drop=True)
 # df = df.sort_values('state', ascending=True)
 
 # Structure type for the US weighted by the floor area in each state.
-weight = data_FA_Arehart['Weight'].reindex_like(data_FA_Arehart)
+weight = pd.Series(1.0, index=data_FA_Arehart.index)
 dist_weighted = summary_df_perc.multiply(weight, axis=0)
 dist_weighted = dist_weighted.drop(columns=['Sum_HAZUS'])
 type_weighted = dist_weighted.sum(axis=0)
 # check
 print('Sum of all structure type weights is: ', sum(dist_weighted.sum(axis=0)))
 # drop structure types that have zero
-type_weighted = type_weighted[(type_weighted != 0)]
+type_weighted = type_weighted.reindex(
+    ['W1F','W2F','S1LF','S2LF','S3F','S4LF','S4HF','S5LF','C1LF','C2LF','C3LF','PC1F','PC2LF','RM1LF','RM1MF','RM2LF','URMLF','MHF'], fill_value=0)
 types_df = pd.DataFrame({'weight':type_weighted}).transpose()
 
 # Convert from HAZUS Definitions to my definitions
@@ -99,7 +100,7 @@ my_weights.to_csv('./InputData/HAZUS_weight.csv')
 # Manipulate and output data by residential, commercial, public, and industrial
 
 # file_name = './InputData/HAZUS_Extract/newjersey_type.txt'
-files = glob.glob(directoryPath+'*occupancy.txt')
+files = glob.glob(directoryPath+'*massachusettes_occupancy.txt')
 # files = glob.glob(directoryPath+'*type.txt')
 for file_name in files:
     state_str = os.path.splitext(os.path.basename(file_name))[0].split('_')[0]
@@ -136,14 +137,15 @@ summary_df_perc = summary_df_perc.set_index(keys='state', drop=True)
 # df = df.sort_values('state', ascending=True)
 
 # Structure type for the US weighted by the floor area in each state.
-weight = data_FA_Arehart['Weight'].reindex_like(data_FA_Arehart)
+weight = pd.Series(1.0, index=data_FA_Arehart.index)
 dist_weighted = summary_df_perc.multiply(weight, axis=0)
 dist_weighted = dist_weighted.drop(columns=['Sum_HAZUS'])
 type_weighted = dist_weighted.sum(axis=0)
 # check
 print('Sum of all structure type weights is: ', sum(dist_weighted.sum(axis=0)))
 # drop structure types that have zero
-type_weighted = type_weighted[(type_weighted != 0)]
+type_weighted = type_weighted.reindex(
+    ['RES1F','RES2F','RES3AF','RES3BF','RES3CF','RES3DF','RES3EF','RES3FF','RES4F','RES5F','RES6F','COM1F','COM2F','COM3F','COM4F','COM5F','COM6F','COM7F','COM8F','COM9F','REL1F','GOV1F','GOV2F','EDU1F','EDU2F'], fill_value=0)
 types_df = pd.DataFrame({'weight':type_weighted}).transpose()
 
 # Convert from HAZUS Definitions to my definitions
